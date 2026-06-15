@@ -2,8 +2,13 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
 import rateLimit from "@fastify/rate-limit";
+import multipart from "@fastify/multipart";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { authRoutes } from "./modules/auth/auth.routes.js";
+import { tasksRoutes } from "./modules/tasks/tasks.routes.js";
+import { attachmentsRoutes } from "./modules/attachments/attachments.routes.js";
+import { eventsRoutes } from "./modules/events/events.routes.js";
+import { adminRoutes } from "./modules/admin/admin.routes.js";
 
 export async function buildApp() {
   const app = Fastify({
@@ -15,6 +20,9 @@ export async function buildApp() {
 
   // Register Cookie Plugin
   await app.register(cookie);
+
+  // Register Multipart Plugin for file uploads
+  await app.register(multipart);
 
   // Register CORS
   await app.register(cors, {
@@ -40,6 +48,10 @@ export async function buildApp() {
   await app.register(
     async (api) => {
       await api.register(authRoutes, { prefix: "/auth" });
+      await api.register(tasksRoutes, { prefix: "/tasks" });
+      await api.register(attachmentsRoutes);
+      await api.register(eventsRoutes, { prefix: "/events" });
+      await api.register(adminRoutes, { prefix: "/admin" });
     },
     { prefix: "/api/v1" }
   );
