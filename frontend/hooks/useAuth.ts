@@ -4,6 +4,17 @@ import { api } from "../lib/api";
 import { useRouter } from "next/navigation";
 import { SignupInput, LoginInput } from "@task-manager/shared";
 
+// Sets/clears a lightweight cookie on the frontend domain so Next.js middleware
+// can detect session state (the real refreshToken cookie lives on the backend domain).
+function setSessionCookie(loggedIn: boolean) {
+  if (typeof document === "undefined") return;
+  if (loggedIn) {
+    document.cookie = "isLoggedIn=1; path=/; max-age=604800; SameSite=Lax";
+  } else {
+    document.cookie = "isLoggedIn=; path=/; max-age=0; SameSite=Lax";
+  }
+}
+
 export function useAuth() {
   const router = useRouter();
   const { user, accessToken, isInitialized, setUser, setToken, setInitialized } = useAuthStore();
@@ -16,6 +27,8 @@ export function useAuth() {
     const res = await api.post("/auth/login", input);
     setUser(res.data.user);
     setToken(res.data.accessToken);
+    setInitialized(true); // prevent the refresh effect from re-running on the dashboard
+    setSessionCookie(true);
     router.push("/tasks");
   };
 
@@ -27,6 +40,7 @@ export function useAuth() {
     }
     setUser(null);
     setToken(null);
+    setSessionCookie(false);
     router.push("/login");
   };
 
@@ -38,9 +52,11 @@ export function useAuth() {
         const res = await api.post("/auth/refresh");
         setUser(res.data.user);
         setToken(res.data.accessToken);
+        setSessionCookie(true);
       } catch (err) {
         setUser(null);
         setToken(null);
+        setSessionCookie(false);
       } finally {
         setInitialized(true);
       }
