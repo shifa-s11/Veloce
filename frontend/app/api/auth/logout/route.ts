@@ -15,7 +15,13 @@ export async function POST(request: NextRequest) {
   }
 
   const response = NextResponse.json({ success: true, data: null, error: null });
-  // Clear the HttpOnly cookie from the Vercel domain
-  response.cookies.delete("refreshToken");
+  // Forcefully clear the HttpOnly cookie
+  response.cookies.set("refreshToken", "", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 0,
+    path: "/",
+  });
   return response;
 }

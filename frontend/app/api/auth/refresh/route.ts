@@ -23,9 +23,15 @@ export async function POST(request: NextRequest) {
     const data = await res.json();
 
     if (!res.ok) {
-      // Refresh failed — clear the stale cookie
+      // Refresh failed — forcefully clear the stale cookie
       const response = NextResponse.json(data, { status: res.status });
-      response.cookies.delete("refreshToken");
+      response.cookies.set("refreshToken", "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 0,
+        path: "/",
+      });
       return response;
     }
 
