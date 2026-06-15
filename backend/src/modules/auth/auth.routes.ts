@@ -57,17 +57,21 @@ export async function authRoutes(app: FastifyInstance) {
     const body = loginSchema.parse(request.body);
     const { user, accessToken, refreshToken } = await AuthService.login(body);
 
+    // Set HttpOnly cookies (works in same-domain / local dev scenarios)
     setAuthCookies(reply, accessToken, refreshToken);
 
+    // Also return tokens in body for cross-domain Bearer token auth (Vercel → Render)
     return reply.status(200).send({
       success: true,
-      data: { user, accessToken },
+      data: { user, accessToken, refreshToken },
       error: null,
     });
   });
 
   app.post("/refresh", async (request: FastifyRequest, reply: FastifyReply) => {
-    const token = request.cookies.refreshToken;
+    // Accept refreshToken from request body (cross-domain Bearer auth) or cookie (same-domain / local)
+    const bodyToken = (request.body as any)?.refreshToken;
+    const token = bodyToken || request.cookies.refreshToken;
 
     if (!token) {
       return reply.status(401).send({
@@ -83,11 +87,13 @@ export async function authRoutes(app: FastifyInstance) {
 
     const { user, accessToken, refreshToken: newRefreshToken } = await AuthService.refresh(token);
 
+    // Set cookies for same-domain environments
     setAuthCookies(reply, accessToken, newRefreshToken);
 
+    // Return tokens in body for cross-domain Bearer token clients
     return reply.status(200).send({
       success: true,
-      data: { user, accessToken },
+      data: { user, accessToken, refreshToken: newRefreshToken },
       error: null,
     });
   });

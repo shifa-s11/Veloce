@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { SignupInput, LoginInput } from "@task-manager/shared";
 
 // Sets/clears a lightweight cookie on the frontend domain so Next.js middleware
-// can detect session state (the real refreshToken cookie lives on the backend domain).
+// can detect session state (the real tokens live in localStorage).
 function setSessionCookie(loggedIn: boolean) {
   if (typeof document === "undefined") return;
   if (loggedIn) {
@@ -13,6 +13,18 @@ function setSessionCookie(loggedIn: boolean) {
   } else {
     document.cookie = "isLoggedIn=; path=/; max-age=0; SameSite=Lax";
   }
+}
+
+function persistTokens(accessToken: string, refreshToken: string) {
+  localStorage.setItem("accessToken", accessToken);
+  localStorage.setItem("refreshToken", refreshToken);
+  setSessionCookie(true);
+}
+
+function clearTokens() {
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  setSessionCookie(false);
 }
 
 export function useAuth() {
@@ -25,10 +37,11 @@ export function useAuth() {
 
   const login = async (input: LoginInput) => {
     const res = await api.post("/auth/login", input);
-    setUser(res.data.user);
-    setToken(res.data.accessToken);
-    setInitialized(true); // prevent the refresh effect from re-running on the dashboard
-    setSessionCookie(true);
+    const { user, accessToken, refreshToken } = res.data;
+    persistTokens(accessToken, refreshToken);
+    setUser(user);
+    setToken(accessToken);
+    setInitialized(true); // prevent re-running refresh effect on dashboard mount
     router.push("/tasks");
   };
 
@@ -36,11 +49,11 @@ export function useAuth() {
     try {
       await api.post("/auth/logout");
     } catch (e) {
-      // Ignore
+      // Ignore network errors on logout
     }
+    clearTokens();
     setUser(null);
     setToken(null);
-    setSessionCookie(false);
     router.push("/login");
   };
 
@@ -48,15 +61,31 @@ export function useAuth() {
     if (isInitialized) return;
 
     const initializeAuth = async () => {
-      try {
-        const res = await api.post("/auth/refresh");
-        setUser(res.data.user);
-        setToken(res.data.accessToken);
-        setSessionCookie(true);
-      } catch (err) {
+      const storedRefreshToken = typeof window !== "undefined"
+        ? localStorage.getItem("refreshToken")
+        : null;
+
+      if (!storedRefreshToken) {
+        // No session at all — go to login
+        clearTokens();
         setUser(null);
         setToken(null);
-        setSessionCookie(false);
+        setInitialized(true);
+        return;
+      }
+
+      try {
+        // Send refreshToken in body — cross-domain safe
+        const res = await api.post("/auth/refresh", { refreshToken: storedRefreshToken });
+        const { user, accessToken, refreshToken } = res.data;
+        persistTokens(accessToken, refreshToken);
+        setUser(user);
+        setToken(accessToken);
+      } catch (err) {
+        // Refresh token expired or revoked — clear session
+        clearTokens();
+        setUser(null);
+        setToken(null);
       } finally {
         setInitialized(true);
       }
