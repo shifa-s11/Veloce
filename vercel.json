@@ -1,6 +1,6 @@
 {
   "installCommand": "npm ci",
   "buildCommand": "npm run build -w @task-manager/shared && npm run build -w @task-manager/frontend",
-  "outputDirectory": "frontend/.next",
+  "outputDirectory": ".next",
   "framework": "nextjs"
 }
