@@ -33,7 +33,6 @@ COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
 COPY --from=builder /app/packages/shared/package.json ./packages/shared/package.json
 COPY --from=builder /app/backend/dist ./backend/dist
 COPY --from=builder /app/backend/package.json ./backend/package.json
-COPY --from=builder /app/backend/node_modules ./backend/node_modules
 COPY --from=builder /app/backend/prisma ./backend/prisma
 
 EXPOSE 8080
