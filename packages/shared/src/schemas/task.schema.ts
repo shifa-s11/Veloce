@@ -8,7 +8,14 @@ export const createTaskSchema = z.object({
   description: z.string().trim().max(1000, "Description cannot exceed 1000 characters").optional().nullable(),
   status: taskStatusSchema.optional().default("TODO"),
   priority: taskPrioritySchema.optional().default("MEDIUM"),
-  dueDate: z.string().datetime({ message: "Invalid date string, must be ISO-8601 format" }).optional().nullable().or(z.date().optional().nullable()),
+  dueDate: z.preprocess((val) => {
+    if (val === "" || val === undefined || val === null) return null;
+    return val;
+  }, z.union([
+    z.string().datetime({ message: "Invalid date string, must be ISO-8601 format" }),
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date format" })
+  ]).optional().nullable()),
 });
 
 export const updateTaskSchema = z.object({
@@ -16,7 +23,14 @@ export const updateTaskSchema = z.object({
   description: z.string().trim().max(1000, "Description cannot exceed 1000 characters").optional().nullable(),
   status: taskStatusSchema.optional(),
   priority: taskPrioritySchema.optional(),
-  dueDate: z.string().datetime({ message: "Invalid date string, must be ISO-8601 format" }).optional().nullable().or(z.date().optional().nullable()),
+  dueDate: z.preprocess((val) => {
+    if (val === "" || val === undefined || val === null) return null;
+    return val;
+  }, z.union([
+    z.string().datetime({ message: "Invalid date string, must be ISO-8601 format" }),
+    z.date(),
+    z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date format" })
+  ]).optional().nullable()),
 });
 
 export type TaskStatus = z.infer<typeof taskStatusSchema>;

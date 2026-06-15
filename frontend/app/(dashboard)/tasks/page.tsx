@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useTasks } from "@/hooks/useTasks.js";
-import { TaskCard } from "@/components/tasks/TaskCard.js";
-import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton.js";
-import { EmptyState } from "@/components/shared/EmptyState.js";
-import { Modal } from "@/components/shared/Modal.js";
-import { TaskForm } from "@/components/tasks/TaskForm.js";
-import { Button } from "@/components/ui/button.js";
-import { Input } from "@/components/ui/input.js";
+import { useTasks } from "@/hooks/useTasks";
+import { TaskCard } from "@/components/tasks/TaskCard";
+import { LoadingSkeleton } from "@/components/shared/LoadingSkeleton";
+import { EmptyState } from "@/components/shared/EmptyState";
+import { Modal } from "@/components/shared/Modal";
+import { TaskForm } from "@/components/tasks/TaskForm";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Plus, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 

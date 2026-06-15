@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
-import { ThemeProvider } from "@/components/shared/ThemeProvider.js";
-import { AuthBarrier } from "@/components/shared/AuthBarrier.js";
+import { ThemeProvider } from "@/components/shared/ThemeProvider";
+import { AuthBarrier } from "@/components/shared/AuthBarrier";
 import { Toaster } from "sonner";
 
-const inter = Inter({ subsets: ["latin"] });
+const outfit = Outfit({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Veloce — Premium Task Manager",
@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={outfit.className}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

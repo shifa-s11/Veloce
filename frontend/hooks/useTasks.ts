@@ -1,5 +1,5 @@
 import useSWR from "swr";
-import { api } from "../lib/api.js";
+import { api } from "../lib/api";
 import { CreateTaskInput, UpdateTaskInput } from "@task-manager/shared";
 
 interface GetTasksParams {

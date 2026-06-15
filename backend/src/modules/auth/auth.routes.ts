@@ -11,7 +11,7 @@ export async function authRoutes(app: FastifyInstance) {
       path: "/",
       httpOnly: true,
       secure: isProduction,
-      sameSite: "strict",
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 15 * 60, // 15 mins in seconds
     });
 
@@ -19,7 +19,7 @@ export async function authRoutes(app: FastifyInstance) {
       path: "/",
       httpOnly: true,
       secure: isProduction,
-      sameSite: "strict",
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
     });
   };
@@ -31,14 +31,14 @@ export async function authRoutes(app: FastifyInstance) {
       path: "/",
       httpOnly: true,
       secure: isProduction,
-      sameSite: "strict",
+      sameSite: isProduction ? "none" : "lax",
     });
 
     reply.clearCookie("refreshToken", {
       path: "/",
       httpOnly: true,
       secure: isProduction,
-      sameSite: "strict",
+      sameSite: isProduction ? "none" : "lax",
     });
   };
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { Sidebar } from "@/components/shared/Sidebar.js";
-import { useSSE } from "@/hooks/useSSE.js";
+import { Sidebar } from "@/components/shared/Sidebar";
+import { useSSE } from "@/hooks/useSSE";
 
 export default function DashboardLayout({
   children,

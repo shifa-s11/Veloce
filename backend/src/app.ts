@@ -3,6 +3,7 @@ import cors from "@fastify/cors";
 import cookie from "@fastify/cookie";
 import rateLimit from "@fastify/rate-limit";
 import multipart from "@fastify/multipart";
+import { env } from "./config/env.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { authRoutes } from "./modules/auth/auth.routes.js";
 import { tasksRoutes } from "./modules/tasks/tasks.routes.js";
@@ -25,10 +26,15 @@ export async function buildApp() {
   await app.register(multipart);
 
   // Register CORS
+  const allowedOrigins = env.ALLOWED_ORIGINS.split(",");
   await app.register(cors, {
     origin: (origin, cb) => {
-      // Allow local development and credential-sharing
-      cb(null, true);
+      // Allow local development, credential sharing, and specified origins
+      if (!origin || env.NODE_ENV !== "production" || allowedOrigins.includes(origin)) {
+        cb(null, true);
+        return;
+      }
+      cb(new Error("Not allowed by CORS"), false);
     },
     credentials: true,
   });

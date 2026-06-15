@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { formatDistanceToNow, isPast } from "date-fns";
 import { Calendar, Paperclip, Eye, Trash2, Edit } from "lucide-react";
-import { Button } from "../ui/button.js";
+import { Button } from "../ui/button";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Modal } from "../shared/Modal.js";
-import { TaskForm } from "./TaskForm.js";
+import { Modal } from "../shared/Modal";
+import { TaskForm } from "./TaskForm";
 
 interface TaskCardProps {
   task: any;
@@ -24,10 +24,10 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
   const isOverdue = hasDueDate && !isCompleted && isPast(new Date(task.dueDate));
 
   const priorityStyles = {
-    LOW: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20",
-    MEDIUM: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
-    HIGH: "bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/20",
-    URGENT: "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20",
+    LOW: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+    MEDIUM: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+    HIGH: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20",
+    URGENT: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/35 font-bold tracking-wide animate-pulse",
   };
 
   const priorityColors = {
@@ -74,9 +74,9 @@ export function TaskCard({ task, onUpdate, onDelete }: TaskCardProps) {
   return (
     <>
       <div
-        className={`group relative flex flex-col justify-between rounded-lg border border-border bg-card p-5 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md border-l-4 ${
+        className={`group relative flex flex-col justify-between rounded-2xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5 hover:border-primary/20 border-l-4 ${
           priorityColors[task.priority as keyof typeof priorityColors] || "border-l-primary"
-        } ${isCompleted ? "opacity-75" : ""}`}
+        } ${isCompleted ? "opacity-60 bg-muted/40" : ""}`}
       >
         <div className="space-y-3">
           <div className="flex items-start justify-between space-x-2">

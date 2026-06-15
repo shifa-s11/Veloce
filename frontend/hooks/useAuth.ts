@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { useAuthStore } from "../lib/store.js";
-import { api } from "../lib/api.js";
+import { useAuthStore } from "../lib/store";
+import { api } from "../lib/api";
 import { useRouter } from "next/navigation";
 import { SignupInput, LoginInput } from "@task-manager/shared";
 

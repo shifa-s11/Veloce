@@ -3,8 +3,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createTaskSchema, CreateTaskInput } from "@task-manager/shared";
-import { Button } from "../ui/button.js";
-import { Input } from "../ui/input.js";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 

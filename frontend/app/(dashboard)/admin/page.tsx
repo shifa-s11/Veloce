@@ -1,11 +1,11 @@
 "use client";
 
-import { useAuth } from "@/hooks/useAuth.js";
+import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
-import { api } from "@/lib/api.js";
-import { Button } from "@/components/ui/button.js";
+import { api } from "@/lib/api";
+import { Button } from "@/components/ui/button";
 import { Loader2, ShieldAlert, CheckSquare, Users, Shield } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";

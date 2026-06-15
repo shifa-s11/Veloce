@@ -159,3 +159,42 @@ npm run test -w @task-manager/backend
    - If Supabase url or secret variables are missing, the server automatically saves uploads to the local filesystem (`uploads/` root folder). Served files are secured by an authentication check middleware so users can't retrieve attachments belonging to other owners.
 3. **Optimistic UI Rollbacks:**
    - The UI mutates the SWR cache immediately on checking off lists or deleting cards. If the API returns an error, SWR catches the exception, rolls back state, and alerts the user using a toast notification.
+
+---
+
+## 🌐 Production Deployment Guide
+
+This section explains how to deploy the application in a production-grade environment.
+
+### 1. Database Setup (Neon / Supabase)
+1. Sign up on [Neon](https://neon.tech) or [Supabase](https://supabase.com).
+2. Create a new PostgreSQL database project.
+3. Copy the connection string (`postgres://...`). Save this for `DATABASE_URL`.
+
+### 2. Backend Deployment on Render
+1. Sign up on [Render](https://render.com) and click **New > Web Service**.
+2. Connect your GitHub repository.
+3. Configure the following settings:
+   - **Name**: `task-manager-api`
+   - **Language**: `Docker`
+   - **Context**: `.` (Crucial: set to root directory, NOT `backend/` because the backend uses code from `packages/shared`).
+   - **Dockerfile Path**: `backend/Dockerfile`
+4. Add the following **Environment Variables** in Render's dashboard:
+   - `PORT`: `8080`
+   - `NODE_ENV`: `production`
+   - `DATABASE_URL`: `[Your-Postgres-Connection-String]`
+   - `JWT_SECRET`: `[Minimum-32-Characters-Random-String]`
+   - `ADMIN_SECRET`: `[Your-Secure-Admin-Password]`
+   - `ALLOWED_ORIGINS`: `https://[your-vercel-domain].vercel.app` (You can update this after deploying the frontend).
+5. Deploy the service. Take note of the Render URL (e.g. `https://task-manager-api.onrender.com`).
+
+### 3. Frontend Deployment on Vercel
+1. Sign up on [Vercel](https://vercel.com) and click **Add New > Project**.
+2. Connect your GitHub repository.
+3. Configure the project settings:
+   - **Framework Preset**: `Next.js`
+   - **Root Directory**: `frontend`
+4. Expand **Environment Variables** and add:
+   - `NEXT_PUBLIC_API_URL`: `https://[your-render-backend-url].onrender.com/api/v1`
+5. Click **Deploy**. Once finished, copy the URL of your Vercel project and add it to Render's `ALLOWED_ORIGINS` variable (remember to redeploy the backend if you updated its env vars).
+

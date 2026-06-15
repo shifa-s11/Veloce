@@ -3,9 +3,9 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginInput } from "@task-manager/shared";
-import { useAuth } from "@/hooks/useAuth.js";
-import { Button } from "@/components/ui/button.js";
-import { Input } from "@/components/ui/input.js";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useState } from "react";
@@ -36,10 +36,10 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-6 rounded-lg border border-border bg-card p-8 shadow-sm">
+    <div className="flex min-h-screen items-center justify-center chic-gradient-bg p-4">
+      <div className="w-full max-w-md space-y-6 rounded-2xl glass-panel p-8 shadow-2xl">
         <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-bold tracking-tight">Welcome Back</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-purple-600 to-pink-500 bg-clip-text text-transparent">Welcome Back</h1>
           <p className="text-sm text-muted-foreground">
             Sign in to manage your tasks effectively
           </p>

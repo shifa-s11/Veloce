@@ -2,9 +2,9 @@
 
 import { useParams, useRouter } from "next/navigation";
 import useSWR from "swr";
-import { api } from "@/lib/api.js";
-import { Button } from "@/components/ui/button.js";
-import { Input } from "@/components/ui/input.js";
+import { api } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Calendar, Paperclip, History, ArrowLeft, Loader2, Plus, FileText, Trash2 } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 import { useState } from "react";

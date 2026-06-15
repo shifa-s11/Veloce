@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/hooks/useAuth.js";
+import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,7 +16,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { Button } from "../ui/button.js";
+import { Button } from "../ui/button";
 
 export function Sidebar() {
   const { user, logout } = useAuth();
@@ -91,11 +91,11 @@ export function Sidebar() {
                 key={item.name}
                 href={item.href}
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center space-x-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-150
-                  ${isActive ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"}
+                className={`flex items-center space-x-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200
+                  ${isActive ? "bg-primary text-primary-foreground shadow-md shadow-primary/25 scale-[1.02]" : "text-muted-foreground hover:bg-muted hover:text-foreground"}
                 `}
               >
-                <Icon className={`h-5 w-5 ${isActive ? "text-primary" : ""}`} />
+                <Icon className={`h-5 w-5 ${isActive ? "text-primary-foreground" : ""}`} />
                 {(!collapsed || mobileOpen) && <span>{item.name}</span>}
               </Link>
             );

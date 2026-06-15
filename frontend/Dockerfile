@@ -23,15 +23,12 @@ FROM node:20-alpine AS runner
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
-COPY --from=builder /app/packages/shared/package.json ./packages/shared/package.json
-COPY --from=builder /app/frontend/.next ./frontend/.next
+ENV NODE_ENV=production
+
+COPY --from=builder /app/frontend/.next/standalone ./
+COPY --from=builder /app/frontend/.next/static ./frontend/.next/static
 COPY --from=builder /app/frontend/public ./frontend/public
-COPY --from=builder /app/frontend/package.json ./frontend/package.json
 
 EXPOSE 3000
 
-WORKDIR /app/frontend
-CMD ["npm", "start"]
+CMD ["node", "frontend/server.js"]

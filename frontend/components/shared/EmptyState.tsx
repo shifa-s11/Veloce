@@ -1,5 +1,5 @@
 import { ClipboardList } from "lucide-react";
-import { Button } from "../ui/button.js";
+import { Button } from "../ui/button";
 
 interface EmptyStateProps {
   title: string;
