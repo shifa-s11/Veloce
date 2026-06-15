@@ -1,3 +1,5 @@
+import { useAuthStore } from "./store";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
 
 interface RequestOptions extends RequestInit {
@@ -16,11 +18,6 @@ function onRefreshed(token: string) {
   refreshSubscribers = [];
 }
 
-function getStoredToken(key: "accessToken" | "refreshToken"): string | null {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(key);
-}
-
 export async function apiFetch(path: string, options: RequestOptions = {}): Promise<any> {
   const url = `${API_URL}${path}`;
 
@@ -33,48 +30,40 @@ export async function apiFetch(path: string, options: RequestOptions = {}): Prom
     (options.headers as any)["Content-Type"] = "application/json";
   }
 
-  // Include cookies for same-domain / local dev compat
   options.credentials = "include";
 
-  // Primary auth: Bearer token from localStorage (works cross-domain)
-  const accessToken = getStoredToken("accessToken");
+  // Read accessToken from Zustand store in-memory — no localStorage, no XSS risk
+  const accessToken = useAuthStore.getState().accessToken;
   if (accessToken) {
     (options.headers as any)["Authorization"] = `Bearer ${accessToken}`;
   }
 
   const response = await fetch(url, options);
 
-  // Access token expired — attempt silent refresh
+  // Access token expired — attempt silent refresh via BFF
   if (response.status === 401 && !path.startsWith("/auth/refresh") && !path.startsWith("/auth/login")) {
     if (!isRefreshing) {
       isRefreshing = true;
       try {
-        const storedRefreshToken = getStoredToken("refreshToken");
-
-        const refreshResponse = await fetch(`${API_URL}/auth/refresh`, {
+        // Call BFF refresh route (same Vercel domain) — reads HttpOnly cookie server-side
+        const refreshResponse = await fetch("/api/auth/refresh", {
           method: "POST",
           credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          // Send refreshToken in body — works cross-domain, unlike cookies
-          body: storedRefreshToken
-            ? JSON.stringify({ refreshToken: storedRefreshToken })
-            : undefined,
         });
 
         if (refreshResponse.ok) {
           const refreshData = await refreshResponse.json();
           const newAccessToken = refreshData.data.accessToken;
-          const newRefreshToken = refreshData.data.refreshToken;
 
-          localStorage.setItem("accessToken", newAccessToken);
-          if (newRefreshToken) localStorage.setItem("refreshToken", newRefreshToken);
+          // Update Zustand store only — no localStorage
+          useAuthStore.getState().setToken(newAccessToken);
 
           isRefreshing = false;
           onRefreshed(newAccessToken);
         } else {
           isRefreshing = false;
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
+          useAuthStore.getState().setToken(null);
+          useAuthStore.getState().setUser(null);
           if (typeof window !== "undefined") {
             window.location.href = "/login";
           }

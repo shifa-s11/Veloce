@@ -1,30 +1,25 @@
 import { useEffect } from "react";
 import { useAuthStore } from "../lib/store";
-import { api } from "../lib/api";
 import { useRouter } from "next/navigation";
 import { SignupInput, LoginInput } from "@task-manager/shared";
+import { api } from "../lib/api";
 
-// Sets/clears a lightweight cookie on the frontend domain so Next.js middleware
-// can detect session state (the real tokens live in localStorage).
-function setSessionCookie(loggedIn: boolean) {
-  if (typeof document === "undefined") return;
-  if (loggedIn) {
-    document.cookie = "isLoggedIn=1; path=/; max-age=604800; SameSite=Lax";
-  } else {
-    document.cookie = "isLoggedIn=; path=/; max-age=0; SameSite=Lax";
+// Auth calls go through the Next.js BFF (/api/auth/...) on the same Vercel domain.
+// The BFF sets/reads HttpOnly cookies server-side — no token ever touches localStorage.
+// The accessToken is kept in Zustand memory only (cleared on page refresh, recovered via /api/auth/refresh).
+
+async function bffFetch(path: string, body?: object) {
+  const res = await fetch(path, {
+    method: "POST",
+    headers: body ? { "Content-Type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+    credentials: "include",
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.error?.message || "Request failed");
   }
-}
-
-function persistTokens(accessToken: string, refreshToken: string) {
-  localStorage.setItem("accessToken", accessToken);
-  localStorage.setItem("refreshToken", refreshToken);
-  setSessionCookie(true);
-}
-
-function clearTokens() {
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
-  setSessionCookie(false);
+  return data;
 }
 
 export function useAuth() {
@@ -36,22 +31,22 @@ export function useAuth() {
   };
 
   const login = async (input: LoginInput) => {
-    const res = await api.post("/auth/login", input);
-    const { user, accessToken, refreshToken } = res.data;
-    persistTokens(accessToken, refreshToken);
-    setUser(user);
-    setToken(accessToken);
-    setInitialized(true); // prevent re-running refresh effect on dashboard mount
+    // BFF sets HttpOnly refreshToken cookie on Vercel domain
+    // Returns accessToken in body for in-memory storage only
+    const res = await bffFetch("/api/auth/login", input);
+    setUser(res.data.user);
+    setToken(res.data.accessToken);
+    setInitialized(true);
     router.push("/tasks");
   };
 
   const logout = async () => {
     try {
-      await api.post("/auth/logout");
+      // BFF clears the HttpOnly cookie server-side
+      await bffFetch("/api/auth/logout");
     } catch (e) {
-      // Ignore network errors on logout
+      // Ignore network errors
     }
-    clearTokens();
     setUser(null);
     setToken(null);
     router.push("/login");
@@ -61,29 +56,13 @@ export function useAuth() {
     if (isInitialized) return;
 
     const initializeAuth = async () => {
-      const storedRefreshToken = typeof window !== "undefined"
-        ? localStorage.getItem("refreshToken")
-        : null;
-
-      if (!storedRefreshToken) {
-        // No session at all — go to login
-        clearTokens();
-        setUser(null);
-        setToken(null);
-        setInitialized(true);
-        return;
-      }
-
       try {
-        // Send refreshToken in body — cross-domain safe
-        const res = await api.post("/auth/refresh", { refreshToken: storedRefreshToken });
-        const { user, accessToken, refreshToken } = res.data;
-        persistTokens(accessToken, refreshToken);
-        setUser(user);
-        setToken(accessToken);
-      } catch (err) {
-        // Refresh token expired or revoked — clear session
-        clearTokens();
+        // BFF reads the HttpOnly refreshToken cookie server-side and issues a new accessToken
+        const res = await bffFetch("/api/auth/refresh");
+        setUser(res.data.user);
+        setToken(res.data.accessToken);
+      } catch {
+        // No valid session — clear state
         setUser(null);
         setToken(null);
       } finally {

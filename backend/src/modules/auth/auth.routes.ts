@@ -99,7 +99,9 @@ export async function authRoutes(app: FastifyInstance) {
   });
 
   app.post("/logout", async (request: FastifyRequest, reply: FastifyReply) => {
-    const token = request.cookies.refreshToken;
+    // Accept from body (BFF server-to-server) or cookie (same-domain / local dev)
+    const bodyToken = (request.body as any)?.refreshToken;
+    const token = bodyToken || request.cookies.refreshToken;
 
     if (token) {
       await AuthService.logout(token);
