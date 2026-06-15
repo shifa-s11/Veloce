@@ -1,24 +1,26 @@
 import { useEffect } from "react";
 import { useSWRConfig } from "swr";
+import { useAuthStore } from "../lib/store";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api/v1";
 
 export function useSSE(enabled: boolean = true) {
   const { mutate } = useSWRConfig();
+  const accessToken = useAuthStore((s) => s.accessToken);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !accessToken) return;
 
-    const eventSource = new EventSource(`${API_URL}/events`, {
-      withCredentials: true,
-    });
+    // EventSource can't send Authorization headers (browser limitation).
+    // Passing the short-lived accessToken as a query param is the standard SSE auth pattern.
+    const url = `${API_URL}/events?token=${encodeURIComponent(accessToken)}`;
+    const eventSource = new EventSource(url, { withCredentials: true });
 
     eventSource.addEventListener("connected", (event: any) => {
       console.log("⚡ SSE connected:", event.data);
     });
 
     const triggerRevalidation = () => {
-      // Revalidate all keys starting with /tasks or matching tasks query
       mutate((key) => typeof key === "string" && key.startsWith("/tasks"));
     };
 
@@ -33,5 +35,5 @@ export function useSSE(enabled: boolean = true) {
     return () => {
       eventSource.close();
     };
-  }, [enabled, mutate]);
+  }, [enabled, mutate, accessToken]);
 }

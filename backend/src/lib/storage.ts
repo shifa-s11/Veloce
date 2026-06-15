@@ -20,8 +20,9 @@ const supabase = useSupabase
   ? createClient(env.SUPABASE_URL!, env.SUPABASE_SERVICE_ROLE_KEY!)
   : null;
 
-// Local uploads directory (outside src)
-export const LOCAL_UPLOADS_DIR = path.resolve(__dirname, "../../../uploads");
+// Use process.cwd()-relative path (/app/backend/uploads) — has write permission in Docker.
+// For production persistence, configure SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY env vars on Render.
+export const LOCAL_UPLOADS_DIR = path.join(process.cwd(), "uploads");
 
 export async function uploadFile(
   userId: string,
