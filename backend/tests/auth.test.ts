@@ -93,7 +93,12 @@ describe("Auth Module Integration Tests", () => {
       expect(res.body.data.user.email).toBe(testUser.email);
 
       // Verify cookies are set
-      const cookies = res.headers["set-cookie"] || [];
+      const cookiesHeader = res.headers["set-cookie"];
+      const cookies = Array.isArray(cookiesHeader)
+        ? cookiesHeader
+        : cookiesHeader
+        ? [cookiesHeader]
+        : [];
       expect(cookies.some((c: string) => c.includes("accessToken"))).toBe(true);
       expect(cookies.some((c: string) => c.includes("refreshToken"))).toBe(true);
     });
@@ -127,7 +132,12 @@ describe("Auth Module Integration Tests", () => {
           password: testUser.password,
         });
 
-      const cookies = loginRes.headers["set-cookie"] || [];
+      const cookiesHeader = loginRes.headers["set-cookie"];
+      const cookies = Array.isArray(cookiesHeader)
+        ? cookiesHeader
+        : cookiesHeader
+        ? [cookiesHeader]
+        : [];
       const refreshCookie = cookies.find((c: string) => c.startsWith("refreshToken="));
       if (refreshCookie) {
         refreshToken = refreshCookie.split(";")[0].split("=")[1];
@@ -145,7 +155,12 @@ describe("Auth Module Integration Tests", () => {
       expect(res.body.success).toBe(true);
       expect(res.body.data.accessToken).toBeDefined();
 
-      const cookies = res.headers["set-cookie"] || [];
+      const cookiesHeader = res.headers["set-cookie"];
+      const cookies = Array.isArray(cookiesHeader)
+        ? cookiesHeader
+        : cookiesHeader
+        ? [cookiesHeader]
+        : [];
       expect(cookies.some((c: string) => c.includes("accessToken"))).toBe(true);
       expect(cookies.some((c: string) => c.includes("refreshToken"))).toBe(true);
     });

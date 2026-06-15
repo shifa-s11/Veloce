@@ -10,14 +10,15 @@ export const errorHandler = (
   request.log.error(error);
 
   // Zod validation errors
-  if (error instanceof ZodError) {
+  if (error.name === "ZodError" || error instanceof ZodError) {
+    const zodError = error as unknown as ZodError;
     return reply.status(422).send({
       success: false,
       data: null,
       error: {
         code: "VALIDATION_ERROR",
         message: "Input validation failed",
-        details: error.errors.map((err) => ({
+        details: zodError.errors.map((err) => ({
           field: err.path.join("."),
           message: err.message,
         })),
@@ -27,9 +28,10 @@ export const errorHandler = (
 
   // Prisma database errors
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    const prismaError = error as Prisma.PrismaClientKnownRequestError;
     // Unique constraint violation (e.g. email already exists)
-    if (error.code === "P2002") {
-      const target = (error.meta?.target as string[])?.join(", ") || "field";
+    if (prismaError.code === "P2002") {
+      const target = (prismaError.meta?.target as string[])?.join(", ") || "field";
       return reply.status(409).send({
         success: false,
         data: null,
@@ -42,7 +44,7 @@ export const errorHandler = (
     }
 
     // Record not found
-    if (error.code === "P2025") {
+    if (prismaError.code === "P2025") {
       return reply.status(404).send({
         success: false,
         data: null,

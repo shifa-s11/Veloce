@@ -9,6 +9,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const useSupabase = !!(env.SUPABASE_URL && env.SUPABASE_SERVICE_ROLE_KEY);
+
+// Polyfill WebSocket for Node.js environments (like Node 20) where it's not defined globally by default,
+// to prevent Supabase's Realtime client initialization from throwing an error.
+if (useSupabase && typeof globalThis.WebSocket === "undefined") {
+  (globalThis as any).WebSocket = class {};
+}
+
 const supabase = useSupabase
   ? createClient(env.SUPABASE_URL!, env.SUPABASE_SERVICE_ROLE_KEY!)
   : null;

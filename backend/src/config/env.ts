@@ -13,8 +13,14 @@ const envSchema = z.object({
   JWT_ACCESS_EXPIRY: z.string().default("15m"),
   JWT_REFRESH_EXPIRY: z.string().default("7d"),
   ALLOWED_ORIGINS: z.string().default("http://localhost:3000"),
-  SUPABASE_URL: z.string().url("SUPABASE_URL must be a valid URL").optional().or(z.literal("")),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().optional().or(z.literal("")),
+  SUPABASE_URL: z.preprocess((val) => {
+    if (typeof val === "string" && (val.includes("[project-ref]") || !val)) return "";
+    return val;
+  }, z.string().url().or(z.literal("")).default("")),
+  SUPABASE_SERVICE_ROLE_KEY: z.preprocess((val) => {
+    if (typeof val === "string" && (val.includes("your-supabase") || !val)) return "";
+    return val;
+  }, z.string().default("")),
   ADMIN_SECRET: z.string().min(8, "ADMIN_SECRET must be at least 8 characters long"),
 });
 
