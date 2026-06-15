@@ -22,8 +22,12 @@ export async function buildApp() {
   // Register Cookie Plugin
   await app.register(cookie);
 
-  // Register Multipart Plugin for file uploads
-  await app.register(multipart);
+  // Register Multipart Plugin for file uploads (allow up to 10MB per the route-level validation)
+  await app.register(multipart, {
+    limits: {
+      fileSize: 11 * 1024 * 1024, // 11MB hard cap (route validates at 10MB)
+    },
+  });
 
   // Register CORS
   const allowedOrigins = env.ALLOWED_ORIGINS.split(",");
